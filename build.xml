@@ -1,0 +1,135 @@
+<project name="JPredictor" default="dist" basedir=".">
+	<description>
+    A simple build file for the JPredictor project.
+  </description>
+
+	<!--Properties for the manifest file -->
+	<property name="Application" value="JPredictor" />
+	<property name="Vendor" value="The Cleveland Clinic" />
+	<property name="SpecVersion" value="2.5.0" />
+	<property name="version" value="2.5.0" />
+	<property name="ImplementTitle" value="${Application}" />
+	<property name="mainclass" value="predictor.Predictor" />
+	<property name="manifest" value="main-class.manifest" />
+
+	<!-- set global properties for this build -->
+	<property name="src" value="src" />
+	<property name="patients" value="Patients" />
+	<property name="build" value="build" />
+	<property name="config" value="config" />
+	<property name="binaries" value="binaries" />
+	<property name="data" value="data" />
+	<property name="dist" value="dist" />
+	<property name="doc" value="docs" />
+	<property name="jars" value="jars" />
+	<property name="images" value="images" />
+	<property name="install" value="installer" />
+
+	<!-- Plugin/app specific libraries -->
+	<property name="Transplant" value="transplantSupport" />
+	<property name="picabg" value="picabg" />
+	<property name="postInfarct" value="postInfarctVSD" />
+	<property name="cardiomyopathy" value="cardiomyopathy" />
+ 	<property name="cabg_pci" value="cabg_pci" />
+	<property name="lvadSupport" value="lvadSupport" />
+
+	<!-- Included libraries -->
+	<property name="activation" value="activation.jar" />
+	<property name="log4j" value="log4j-1.2.15.jar" />
+	<property name="mail" value="mail-1.4.2.jar" />
+	<property name="forms" value="forms-1.3.0.jar" />
+	<property name="looks" value="looks-2.3.1.jar" />
+	<property name="bindings" value="binding-2.0.6.jar" />
+	<property name="chart" value="jfreechart-1.0.13.jar" />
+	<property name="commons" value="jcommon-1.0.16.jar" />
+	<property name="validation" value="validation-2.1.0.jar" />
+	<!-- This is the only wacked part of auto generating manifest files.... -->
+	<!-- The spacing in the classpath matters so that lines are broken at 72 chars -->
+	<!-- So, watch what we do with the spaces here -->
+	<property name="manifestclasspath" value="lib/${log4j} lib/${activation} lib/${mail}      lib/${forms} lib/${looks} lib/${bindings}        lib/${chart} lib/${commons}                      lib/${validation} ${Transplant}.jar ${picabg}.jar       ${cabg_pci}.jar ${postInfarct}.jar ${cardiomyopathy}.jar ${lvadSupport}.jar" />
+	<property name="classpath" value="${jars}/${log4j}:${jars}/${activation}:${jars}/${mail}:${jars}/${forms}:${jars}/${looks}:${jars}/${bindings}:${jars}/${chart}:${jars}/${commons}:${jars}/${validation}:${Transplant}.jar:${picabg}.jar:${postInfarct}.jar:${cardiomyopathy}.jar:${cabg_pci}.jar}:$lvadSupport}.jar" />
+
+	<!-- Build processes -->
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}" />
+	</target>
+
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="off" verbose="on" optimize="on" />
+	</target>
+
+	<target name="dist" depends="compile">
+
+
+		<!-- build a manifest that matches the ant build spec -->
+		<manifest file="${manifest}">
+			<attribute name="Built-By" value="${user.name} ${TODAY}" />
+			<attribute name="Main-Class" value="${mainclass}" />
+			<attribute name="Specification-Title" value="${Application} Application" />
+			<attribute name="Specification-Version" value="${version}" />
+			<attribute name="Specification-Vendor" value="${Vendor}" />
+			<attribute name="Implementation-Title" value="${Application}" />
+			<attribute name="Implementation-Version" value="${version} - ${TODAY}" />
+			<attribute name="Implementation-Vendor" value="${Vendor}" />
+			<attribute name="Class-Path" value="${manifestclasspath}" />
+		</manifest>
+
+		<!-- Create the distribution directory -->
+		<!-- This needs to exist, but we don't copy into it.-->
+		<mkdir dir="${dist}/log" />
+
+		<!-- Create this to store patient files -->
+		<copy todir="${dist}/${patients}">
+				<fileset dir="${patients}" />
+			</copy>
+
+		<!-- These are created as we copy into them -->
+		<copy todir="${dist}/${config}">
+			<fileset dir="${config}" />
+		</copy>
+		<copy todir="${dist}/lib">
+			<fileset dir="${jars}" />
+		</copy>
+		<copy todir="${dist}/${images}">
+			<fileset dir="${images}" />
+		</copy>
+		<copy todir="${dist}/${binaries}">
+			<fileset dir="${binaries}" />
+		</copy>
+		<!-- Make all the files in binaries read/exec -->
+		<chmod dir="${dist}/${binaries}" perm="ugo+rx" includes="**/*" />
+
+		<!-- This is the application data directory -->
+		<copy todir="${dist}/${data}">
+			<fileset dir="${data}" />
+		</copy>
+		<jar jarfile="${dist}/${Transplant}.jar" basedir="${build}" includes="${Transplant}/**" />
+		<jar jarfile="${dist}/${picabg}.jar" basedir="${build}" includes="${picabg}/**" />
+		<jar jarfile="${dist}/${postInfarct}.jar" basedir="${build}" includes="${postInfarct}/**" />
+	<jar jarfile="${dist}/${lvadSupport}.jar" basedir="${build}" includes="${lvadSupport}/**" />
+		<jar jarfile="${dist}/${cardiomyopathy}.jar" basedir="${build}" includes="${cardiomyopathy}/**" />
+    <jar jarfile="${dist}/${cabg_pci}.jar" basedir="${build}" includes="${cabg_pci}/**" />
+
+		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+		<jar jarfile="${dist}/${Application}.jar" basedir="${build}" manifest="${manifest}" 
+			includes="util/** predictor/**  support/** patient/** patientModelSet/** graph/** " />
+
+	</target>
+
+	<!-- Create and compile the application documentation -->
+	<target name="javadoc">
+		<javadoc access="public" author="true" classpath="${classpath}" destdir="docs/api" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="predictor, support, util" source="1.5" sourcepath="src" splitindex="true" use="true" version="true" />
+	</target>
+
+	<target name="clean">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+		<delete file="${manifest}" />
+	</target>
+</project>

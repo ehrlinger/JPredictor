@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.6.0_0" class="java.beans.XMLDecoder">
+ <object class="patientModelSet.PatientModelSet">
+  <void property="classload">
+   <string>cabg_pci.CABG_pci</string>
+  </void>
+  <void property="patientSet">
+   <void method="add">
+    <object class="cabg_pci.CABG_pci">
+     <void property="afib_pr">
+      <boolean>true</boolean>
+     </void>
+     <void property="age">
+      <double>72.0</double>
+     </void>
+     <void property="bun_pr">
+      <double>17.0</double>
+     </void>
+     <void property="cad_sys">
+      <string>3</string>
+     </void>
+     <void property="creat_pr">
+      <double>1.4</double>
+     </void>
+     <void property="hx_cva">
+      <boolean>true</boolean>
+     </void>
+     <void property="hx_rnldz">
+      <boolean>true</boolean>
+     </void>
+     <void property="hx_smoke">
+      <boolean>true</boolean>
+     </void>
+     <void property="lvef">
+      <double>30.0</double>
+     </void>
+  <void property="graphTime">
+   <double>10.0</double>
+  </void>
+    </object>
+   </void>
+  </void>
+ </object>
+</java>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0" class="java.beans.XMLDecoder"> 
+ <object class="patientModelSet.PatientModelSet"> 
+  <void property="graphTime"> 
+   <double>20.0</double> 
+  </void> 
+  <void property="patientSet"> 
+   <void method="add"> 
+    <object class="transplantSupport.TransplantSupport"> 
+     <void property="bilils"> 
+      <double>0.5</double> 
+     </void> 
+     <void property="birthDate"> 
+      <object class="java.util.Date"> 
+       <long>-898718400000</long> 
+      </object> 
+     </void> 
+     <void property="bloodgroup"> 
+      <string>O</string> 
+     </void> 
+     <void property="bunls"> 
+      <double>15.0</double> 
+     </void> 
+     <void property="cardiomyopathy"> 
+      <string>Ischemic</string> 
+     </void> 
+     <void property="creals"> 
+      <double>1.1</double> 
+     </void> 
+     <void property="height"> 
+      <double>178.0</double> 
+     </void> 
+     <void property="hgbls"> 
+      <double>9.9</double> 
+     </void> 
+     <void property="hx_csurg"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="iabpls"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="listDate"> 
+      <object class="java.util.Date"> 
+       <long>1113883200000</long> 
+      </object> 
+     </void> 
+     <void property="lvefpr"> 
+      <double>10.0</double> 
+     </void> 
+     <void property="padpr"> 
+      <double>12.0</double> 
+     </void> 
+     <void property="paspr"> 
+      <double>20.0</double> 
+     </void> 
+     <void property="patientColor"> 
+      <string>VERY_DARK_BLUE</string> 
+     </void> 
+     <void property="patientName"> 
+      <string>CS</string> 
+     </void> 
+     <void property="pcwpr"> 
+      <double>12.0</double> 
+     </void> 
+     <void property="rhbcopos"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+  </void> 
+ </object> 
+</java> 

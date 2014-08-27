@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0" class="java.beans.XMLDecoder"> 
+ <object class="patientModelSet.PatientModelSet"> 
+  <void property="graphTime"> 
+   <double>20.0</double> 
+  </void> 
+  <void property="patientSet"> 
+   <void method="add"> 
+    <object class="cardiomyopathy.Cardiomyopathy"> 
+     <void property="afib_pr"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="age"> 
+      <double>60.0</double> 
+     </void> 
+     <void property="avrgrg"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="bun_pr"> 
+      <double>22.0</double> 
+     </void> 
+     <void property="chb_pr"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="chol_pr"> 
+      <double>170.0</double> 
+     </void> 
+     <void property="confidenceLimits"> 
+      <boolean>false</boolean> 
+     </void> 
+     <void property="ef_com"> 
+      <double>17.0</double> 
+     </void> 
+     <void property="hct_pr"> 
+      <double>40.0</double> 
+     </void> 
+     <void property="hx_copd"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="hx_cva"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="hx_popdz"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="hx_rnldz"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="iv_pmi"> 
+      <double>6.0</double> 
+     </void> 
+     <void property="patientName"> 
+      <string>hp.dead.patients 4</string> 
+     </void> 
+    </object> 
+   </void> 
+  </void> 
+ </object> 
+</java> 

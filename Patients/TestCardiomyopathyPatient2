@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0" class="java.beans.XMLDecoder"> 
+ <object class="patientModelSet.PatientModelSet"> 
+  <void property="graphTime"> 
+   <double>8.0</double> 
+  </void> 
+  <void property="patientSet"> 
+   <void method="add"> 
+    <object class="cardiomyopathy.Cardiomyopathy"> 
+     <void property="age"> 
+      <double>75.0</double> 
+     </void> 
+     <void property="bun_pr"> 
+      <double>30.0</double> 
+     </void> 
+     <void property="canadianAngina"> 
+      <string>2</string> 
+     </void> 
+     <void property="chol_pr"> 
+      <double>200.0</double> 
+     </void> 
+     <void property="confidenceLimits"> 
+      <boolean>false</boolean> 
+     </void> 
+     <void property="ef_com"> 
+      <double>15.0</double> 
+     </void> 
+     <void property="hx_cva"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="iv_pmi"> 
+      <double>5.0</double> 
+     </void> 
+     <void property="nyha"> 
+      <string>III</string> 
+     </void> 
+     <void property="patientName"> 
+      <string>Test Patient 2</string> 
+     </void> 
+    </object> 
+   </void> 
+  </void> 
+ </object> 
+</java> 

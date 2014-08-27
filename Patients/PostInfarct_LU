@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.5.0_08" class="java.beans.XMLDecoder"> 
+ <object class="postInfarctVSD.PostInfarctVSD"> 
+  <void property="bun"> 
+   <double>92.0</double> 
+  </void> 
+  <void property="iv_misg"> 
+   <int>3</int> 
+  </void> 
+  <void property="opDate"> 
+   <object class="java.util.Date"> 
+    <long>465624000000</long> 
+   </object> 
+  </void> 
+  <void property="patientName"> 
+   <string>Patient 2 (LU)</string> 
+  </void> 
+  <void property="rv_abnor"> 
+   <boolean>true</boolean> 
+  </void> 
+ </object> 
+</java> 

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.5.0_08" class="java.beans.XMLDecoder"> 
+ <object class="transplantSupport.TransplantSupport"> 
+  <void property="aicdls"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="bilils"> 
+   <double>1.6</double> 
+  </void> 
+  <void property="birthDate"> 
+   <object class="java.util.Date"> 
+    <long>-969476400000</long> 
+   </object> 
+  </void> 
+  <void property="bunls"> 
+   <double>23.0</double> 
+  </void> 
+  <void property="cardiomyopathy"> 
+   <string>Ischemic</string> 
+  </void> 
+  <void property="creals"> 
+   <double>1.3</double> 
+  </void> 
+  <void property="diabetes"> 
+   <string>Oral</string> 
+  </void> 
+  <void property="height"> 
+   <double>172.0</double> 
+  </void> 
+  <void property="hgbls"> 
+   <double>12.9</double> 
+  </void> 
+  <void property="hx_chol"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="hx_csurg"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="hx_cva"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="listDate"> 
+   <object class="java.util.Date"> 
+    <long>1110862800000</long> 
+   </object> 
+  </void> 
+  <void property="lvefpr"> 
+   <double>10.0</double> 
+  </void> 
+  <void property="padpr"> 
+   <double>20.0</double> 
+  </void> 
+  <void property="paspr"> 
+   <double>60.0</double> 
+  </void> 
+  <void property="patientColor"> 
+   <string>VERY_DARK_BLUE</string> 
+  </void> 
+  <void property="patientName"> 
+   <string>RMCF</string> 
+  </void> 
+  <void property="pcwpr"> 
+   <double>30.0</double> 
+  </void> 
+  <void property="tranpr"> 
+   <boolean>true</boolean> 
+  </void> 
+ </object> 
+</java> 

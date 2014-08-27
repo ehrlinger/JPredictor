@@ -1,0 +1,668 @@
+1                                                          The SAS System                            13:31 Monday, September 3, 2007
+
+NOTE: Copyright (c) 1999-2001 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software Release 8.2 (TS2M0)
+      Licensed to CLEVELAND CLINIC FOUNDATION, Site 0007023003.
+NOTE: This session is executing on the SunOS 5.9 platform.
+
+
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the files "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+NOTE: SAS initialization used:
+      real time           0.03 seconds
+      cpu time            0.03 seconds
+      
+1          %macro skkip;
+2          // JOB hp.dead.prediction_model.sas
+3          sas8.2 hp.dead.prediction_model.sas
+4          //cp hp.dead.prediction_model.l*\
+5          //   /studies/cardiac/failure/ischemic/comparison/graphs/.
+6          //spool cont printer 'lptxt -l110 -s6 -f LetterGothic-Bold'
+7          spool cont to email
+8          splfile hp.dead.prediction_model.l*
+9          // FILE hp.dead.prediction_model.sas
+10         %mend;
+11         *______________________________________________________________________________;
+12         *                                                                              ;
+13         * /hp.dead.prediction_model.sas
+14         *______________________________________________________________________________;
+15         *                                                                              ;
+16          %let STUDY=/studies/cardiac/failure/ischemic/comparison;
+17         *______________________________________________________________________________;
+18         *                                                                              ;
+19         * Surgical Management for Patients with Ischemic Cardiomyopathy
+20         * (CCF, 1997 to 2006, n=1321)
+21         *
+22         * Multivariable analysis of time-related death
+23         *
+24         * Using the multivariable equation for death, predict survival
+25         * For four surgical management groups;
+26         *   a). CABG alone
+27         *   b). CABG +MV anuloplasty
+28         *   c). DOR
+29         *   d). Heart Transplant
+30         *
+31         *
+32         * Export estimates for the four models to transport files for blackbox
+33         *______________________________________________________________________________;
+34         *                                                                              ;
+35           options pagesize=107 linesize=132;
+36           libname est v8  "&STUDY/estimates";
+NOTE: Libref EST was successfully assigned as follows: 
+      Engine:        V8 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/estimates
+37           libname graphs  "&STUDY/graphs";
+NOTE: Libref GRAPHS was successfully assigned as follows: 
+      Engine:        V8 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/graphs
+38           title1 "Surgical Management for Patients with Ischemic Cardiomyopathy";
+39           title2 "(CCF, 1997 to 2006, n=1321)";
+40           title3 "Multivariable Analysis of Death";
+41           title4 "Preoperative  Models for 4 surgical management groups";
+42         *______________________________________________________________________________;
+43         *                                                                              ;
+44         *               M U L T I V A R I A B L E   M O D E L S
+45         *______________________________________________________________________________;
+46         *                                                                              ;
+47         * variables listed in order:
+48         *
+49         * Early Hazard Phase:
+50         *       nyha34,ln_ef,cac_pr, chb_pr,
+51         *       hx_cva, hx_copd, hx_rnldz
+52         
+53         * Late Hazard Phase:
+54         *       agee,
+55         *       ef2, afib_pr,chb_pr, lmtany, rca50, lcx70, avrgrg, in_ivpmi,ivpmi2, ms_pmi,
+56         *       hx_popdz, hx_copd, hx_dmtrt, hx_iddm, in_chol, ms_cholp,
+57         *       hx_rnldz, ln_bun, ln_hct,  ms_hctp
+58         *
+59         *______________________________________________________________________________;
+60         *                                                                              ;
+61         * Definitions of variables in models;
+62           data design;
+63         
+64         * Demography;
+65           age=62;
+66         
+67         * Cardiac morbidity;
+68           iv_pmi=3;          /* Interval (years) from MI to operation              */
+69           ef_com=20;          /* LV ejection fraction (%)                           */
+70           nyha34=1;          /* NYHA function class 1/II vs III/IV (binary: 0, 1)  */
+71           cac_pr=2;          /* Cadian Angina Class:possible values: (0, 1, 2, 3, 4) */
+72           afib_pr=0;         /* Atrial Fibrillation (no/yes) (0,1) */
+73           chb_pr=0;          /* Complete heart block/pacer (no/yes) (0,1) */
+74           avrgrg=0;          /* AV regurgitation (no/yes) (0, 1) */
+75           lmtany=1;          /* LMT disease: stenosis>0%  (no/yes) (0, 1) */
+76           rca50=1;           /* RCA disease: stenosis>=50%  (no/yes) (0, 1) */
+77           lcx70=1;           /* LCX disease: stenosis>=70%  (no/yes) (0, 1) */
+78         
+79           ms_pmi=0;          /* missing value flag */
+80           ms_cadsy=0;        /* missing value flag */
+2                                                          The SAS System                            13:31 Monday, September 3, 2007
+
+81         
+82         * Non-cardiac comorbidity;
+83           hx_cva=0;             /* History of stroke (no/yes) (0, 1) */
+84           hx_copd=0;            /* History of COPD (no/yes) (0, 1) */
+85           hx_popdz=0;           /* History of popliteal disease (no/yes) (0, 1) */
+86           hx_dmtrt=0;           /* History of treated diabetes (no/yes) (0, 1) */
+87           hx_iddm=0;            /* History of insulin dependent diabetes (no/yes) (0, 1) */
+88           chol_pr=168;           /* Cholesterol (mg/dL)                       */
+89           hct_pr=37;            /* Hematocrit (%)                       */
+90           hx_rnldz=0;           /* History of renal disease (no/yes) (0, 1) */
+91           bun_pr=24;            /* Blood urea nitrogen (mg/dL)                       */
+92         
+93           ms_cholp=0;           /* missing value flag */
+94           ms_hctp=0;            /* missing value flag */
+95           years=1;
+96         
+97         *******************************************************************************;
+98         * Set up variable values for a specific patient;
+99         * Two last variables are for prognostic model;
+100          patient=1;  age=60;
+101                      iv_pmi=3; ef_com=20; nyha34=1; cac_pr=2; afib_pr=0; chb_pr=0;
+102                      avrgrg=0; lmtany=1; rca50=1; lcx70=1; ms_pmi=0; ms_cadsy=0;
+103        
+104                      hx_cva=0; hx_copd=0; hx_popdz=0; hx_dmtrt=0; hx_iddm=0; chol_pr=168;
+105                      hct_pr=37; hx_rnldz=0; bun_pr=24; ms_cholp=0; ms_hctp=0;
+106          output;
+107        
+108          patient=2;  age=75;
+109                      iv_pmi=5; ef_com=15; nyha34=1; cac_pr=2; afib_pr=0; chb_pr=0;
+110                      avrgrg=0; lmtany=1; rca50=1; lcx70=1; ms_pmi=0; ms_cadsy=0;
+111        
+112                      hx_cva=1; hx_copd=0; hx_popdz=0; hx_dmtrt=0; hx_iddm=0; chol_pr=200;
+113                      hct_pr=37; hx_rnldz=0; bun_pr=30; ms_cholp=0; ms_hctp=0;
+114          output;
+115        *******************************************************************************;
+116        * Transformations of variables;
+
+NOTE: The data set WORK.DESIGN has 2 observations and 26 variables.
+NOTE: DATA statement used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+117          data design; set design;
+118          agee=exp(age/50);
+119          ln_ef=log(ef_com);
+120          ef2=(ef_com/20)**2;
+121          ivpmi2=(iv_pmi/3)**2;
+122          in_ivpmi=(1/(iv_pmi+1));
+123          in_chol=(100/chol_pr);
+124          ln_bun=log(bun_pr);
+125          ln_hct=log(hct_pr);
+
+NOTE: There were 2 observations read from the data set WORK.DESIGN.
+NOTE: The data set WORK.DESIGN has 2 observations and 34 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+126          proc print d;
+127        *______________________________________________________________________________;
+128        *                                                                              ;
+129        * Predictions                                                                  ;
+130        *______________________________________________________________________________;
+131        *                                                                              ;
+132        * Generate and output points, remembering any transforms                       ;
+
+NOTE: There were 2 observations read from the data set WORK.DESIGN.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+133          data predict; set design; digital=0;
+134          min=-8; max=log(9); inc=(max-min)/999.9;
+135          do ln_yrs=min to max by inc, max; years=exp(ln_yrs); output; end;
+136        *******************************************************************************;
+137        * Generate time points at "nice" intervals for tabular (digital) depiction     ;
+
+NOTE: There were 2 observations read from the data set WORK.DESIGN.
+NOTE: The data set WORK.PREDICT has 2002 observations and 39 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+138          data digital; set design; digital=1;
+139          do years=30/365.2425, 3/12, 6/12, 9/12, 1 to 9 by 1; output; end;
+140        *******************************************************************************;
+141        * Transformations of variables                                                 ;
+
+NOTE: There were 2 observations read from the data set WORK.DESIGN.
+NOTE: The data set WORK.DIGITAL has 26 observations and 35 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+142          data predict; set predict digital;
+143        *******************************************************************************;
+144        * Do predictions, exporting at the same time the estimates to transport files;
+145        * CABG alone model;
+146           title6 "CABG alone Model";
+3                                                          The SAS System                            13:31 Monday, September 3, 2007
+
+147          %hazpred(
+148          proc hazpred data=predict inhaz=est.hmdead_cabg out=pred_cabg; time years; )
+
+NOTE: There were 2002 observations read from the data set WORK.PREDICT.
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.PREDICT has 2028 observations and 39 variables.
+NOTE: DATA statement used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+NOTE: There were 2028 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_CABG has 2028 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+149        
+150          libname export xport "&STUDY/estimates/hmdead_cabg.dta";
+NOTE: Libref EXPORT was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/estimates/hmdead_cabg.dta
+151          data hmdead_cabg; set est.hmdead_cabg;
+
+NOTE: There were 89 observations read from the data set EST.HMDEAD_CABG.
+NOTE: The data set WORK.HMDEAD_CABG has 89 observations and 86 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+152          data export.export; set hmdead_cabg;
+
+NOTE: There were 89 observations read from the data set WORK.HMDEAD_CABG.
+NOTE: The data set EXPORT.EXPORT has 89 observations and 86 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+153          proc print data=est.hmdead_cabg;
+154          run;
+
+NOTE: There were 89 observations read from the data set EST.HMDEAD_CABG.
+NOTE: The PROCEDURE PRINT printed pages 2-7.
+NOTE: PROCEDURE PRINT used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+155        
+156        ******************************************************************************************;
+157        * CABG+MV anuloplasty model;
+158        title6 "CABG + MV anuloplasty Model";
+159          %hazpred(
+160          proc hazpred data=predict inhaz=est.hmdead_cbgv out=pred_cbgv; time years; )
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+NOTE: There were 2028 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_CBGV has 2028 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+161        
+162          libname export xport "&STUDY/estimates/hmdead_cbgv.dta";
+NOTE: Libref EXPORT was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/estimates/hmdead_cbgv.dta
+163          data hmdead_cbgv; set est.hmdead_cbgv;
+
+NOTE: There were 89 observations read from the data set EST.HMDEAD_CBGV.
+NOTE: The data set WORK.HMDEAD_CBGV has 89 observations and 86 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+164          data export.export; set hmdead_cbgv;
+
+NOTE: There were 89 observations read from the data set WORK.HMDEAD_CBGV.
+NOTE: The data set EXPORT.EXPORT has 89 observations and 86 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+4                                                          The SAS System                            13:31 Monday, September 3, 2007
+
+165          proc print data=est.hmdead_cbgv;
+166          run;
+
+NOTE: There were 89 observations read from the data set EST.HMDEAD_CBGV.
+NOTE: The PROCEDURE PRINT printed pages 8-13.
+NOTE: PROCEDURE PRINT used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+167        
+168        ******************************************************************************************;
+169        * DOR model;
+170         title6 "DOR Model";
+171          %hazpred(
+172          proc hazpred data=predict inhaz=est.hmdead_dor out=pred_dor; time years; )
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+NOTE: There were 2028 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_DOR has 2028 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+
+173        
+174          libname export xport "&STUDY/estimates/hmdead_dor.dta";
+NOTE: Libref EXPORT was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/estimates/hmdead_dor.dta
+175          data hmdead_dor; set est.hmdead_dor;
+
+NOTE: There were 89 observations read from the data set EST.HMDEAD_DOR.
+NOTE: The data set WORK.HMDEAD_DOR has 89 observations and 86 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+176          data export.export; set hmdead_dor;
+
+NOTE: There were 89 observations read from the data set WORK.HMDEAD_DOR.
+NOTE: The data set EXPORT.EXPORT has 89 observations and 86 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+177          proc print data=est.hmdead_dor;
+178          run;
+
+NOTE: There were 89 observations read from the data set EST.HMDEAD_DOR.
+NOTE: The PROCEDURE PRINT printed pages 14-19.
+NOTE: PROCEDURE PRINT used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+179        
+180        ******************************************************************************************;
+181        * Heart Transplant model;
+182          title6 "Heart Transplant Model";
+183          %hazpred(
+184          proc hazpred data=predict inhaz=est.hmdead_txpl out=pred_txpl; time years; )
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+NOTE: There were 2028 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_TXPL has 2028 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+185        
+186          libname export xport "&STUDY/estimates/hmdead_txpl.dta";
+NOTE: Libref EXPORT was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/estimates/hmdead_txpl.dta
+187          data hmdead_txpl; set est.hmdead_txpl;
+
+NOTE: There were 83 observations read from the data set EST.HMDEAD_TXPL.
+NOTE: The data set WORK.HMDEAD_TXPL has 83 observations and 80 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+188          data export.export; set hmdead_txpl;
+
+NOTE: There were 83 observations read from the data set WORK.HMDEAD_TXPL.
+NOTE: The data set EXPORT.EXPORT has 83 observations and 80 variables.
+5                                                          The SAS System                            13:31 Monday, September 3, 2007
+
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+189          proc print data=est.hmdead_txpl;
+190          run;
+
+NOTE: There were 83 observations read from the data set EST.HMDEAD_TXPL.
+NOTE: The PROCEDURE PRINT printed pages 20-23.
+NOTE: PROCEDURE PRINT used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+191        
+192        ******************************************************************************************;
+193        ******************************************************************************************;
+194        
+195          /* did not work
+196          filename import "&STUDY/estimates/hmpodead.dta";
+197          proc cimport library=est infile=import;
+198          proc print data=hmpodead;
+199          run;
+200        
+201          libname graphs  "&STUDY/graphs";
+202          libname import xport "&STUDY/estimates/hmpodead.dta";
+203          proc copy in=import out=graphs;
+204          proc print data=graphs.export;
+205          run;
+206          */
+207        
+208        
+209          /* Made an file called export.sas7bdat in /graphs */
+210        *______________________________________________________________________________;
+211        *                                                                              ;
+212        *                                  P L O T S
+213        *______________________________________________________________________________;
+214        *                                                                              ;
+215        * Printer plot survival and hazard                                             ;
+216        
+217          title6 "CABG alone Model";
+218          proc plot data=pred_cabg;
+219               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+220                  /overlay;
+221          run;
+
+222        
+223          title6 "CABG + MV anuloplasty Model";
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_CABG.
+NOTE: The PROCEDURE PLOT printed page 24.
+NOTE: PROCEDURE PLOT used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+224          proc plot data=pred_cbgv;
+225               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+226                  /overlay;
+227          run;
+
+228        
+229          title6 "DOR Model";
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_CBGV.
+NOTE: The PROCEDURE PLOT printed page 25.
+NOTE: PROCEDURE PLOT used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+230          proc plot data=pred_dor;
+231               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+232                  /overlay;
+233          run;
+
+234        
+235          title6 "Heart Transplant Model";
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_DOR.
+NOTE: The PROCEDURE PLOT printed page 26.
+NOTE: PROCEDURE PLOT used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+236          proc plot data=pred_txpl;
+237               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+238                  /overlay;
+239          run;
+
+240        
+241        *******************************************************************************;
+242        * Digital nomogram                                                             ;
+243          title6 "CABG alone Model";
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_TXPL.
+NOTE: The PROCEDURE PLOT printed page 27.
+NOTE: PROCEDURE PLOT used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+244          data digital; set pred_cabg; if digital=1;
+6                                                          The SAS System                            13:31 Monday, September 3, 2007
+
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_CABG.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+245          proc sort; by patient years;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+246          proc print d; by patient; var patient years
+247               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+248          run;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed page 28.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+249        
+250          title6 "CABG+MV anuloplasty Model";
+251          data digital; set pred_cbgv; if digital=1;
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_CBGV.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+252          proc sort; by patient years;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+253          proc print d; by patient; var patient years
+254               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+255          run;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed page 29.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+256        
+257          title6 "DOR Model";
+258          data digital; set pred_dor; if digital=1;
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_DOR.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+259          proc sort; by patient years;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+260          proc print d; by patient; var patient years
+261               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+262          run;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed page 30.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+263        
+264          title6 "Heart Transplant Model";
+265          data digital; set pred_txpl; if digital=1;
+
+NOTE: There were 2028 observations read from the data set WORK.PRED_TXPL.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+266          proc sort; by patient years;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 26 observations and 51 variables.
+7                                                          The SAS System                            13:31 Monday, September 3, 2007
+
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+267          proc print d; by patient; var patient years
+268               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+269          run;
+
+NOTE: There were 26 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed page 31.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+270        
+271        *******************************************************************************;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.79 seconds
+      cpu time            0.68 seconds
+      

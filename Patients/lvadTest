@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.6.0_18" class="java.beans.XMLDecoder">
+ <object id="PatientModelSet0" class="patientModelSet.PatientModelSet">
+  <void property="classload">
+   <string>lvadSupport.LVADSupport</string>
+  </void>
+  <void property="graphTime">
+   <double>0.25</double>
+  </void>
+  <void property="patientSet">
+   <void method="add">
+    <object class="lvadSupport.LVADSupport">
+     <void property="hx_htn">
+      <boolean>true</boolean>
+     </void>
+     <void property="lvad">
+      <boolean>true</boolean>
+     </void>
+     <void property="mcsDate">
+      <object class="java.util.Date">
+       <long>1230786000000</long>
+      </object>
+     </void>
+     <void property="mcsDate2">
+      <object class="java.util.Date">
+       <long>1235883600000</long>
+      </object>
+     </void>
+     <void property="modelSet">
+      <object idref="PatientModelSet0"/>
+     </void>
+     <void property="vent_pr">
+      <boolean>true</boolean>
+     </void>
+    </object>
+   </void>
+  </void>
+ </object>
+</java>

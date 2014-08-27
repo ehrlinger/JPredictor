@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.5.0_08" class="java.beans.XMLDecoder"> 
+ <object class="transplantSupport.TransplantSupport"> 
+  <void property="aicdls"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="albls"> 
+   <double>4.0</double> 
+  </void> 
+  <void property="angpr_s"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="bilils"> 
+   <double>1.6</double> 
+  </void> 
+  <void property="birthDate"> 
+   <object class="java.util.Date"> 
+    <long>-780782400000</long> 
+   </object> 
+  </void> 
+  <void property="bpraflls"> 
+   <double>1.0</double> 
+  </void> 
+  <void property="bunls"> 
+   <double>17.0</double> 
+  </void> 
+  <void property="creals"> 
+   <double>1.0</double> 
+  </void> 
+  <void property="height"> 
+   <double>183.0</double> 
+  </void> 
+  <void property="hgbls"> 
+   <double>13.6</double> 
+  </void> 
+  <void property="hx_csurg"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="listDate"> 
+   <object class="java.util.Date"> 
+    <long>1111986000000</long> 
+   </object> 
+  </void> 
+  <void property="lvefpr"> 
+   <double>20.0</double> 
+  </void> 
+  <void property="paspr"> 
+   <double>68.0</double> 
+  </void> 
+  <void property="patientName"> 
+   <string>Test Patient</string> 
+  </void> 
+  <void property="pcwpr"> 
+   <double>32.0</double> 
+  </void> 
+  <void property="pre_pvr"> 
+   <double>3.0</double> 
+  </void> 
+ </object> 
+</java> 

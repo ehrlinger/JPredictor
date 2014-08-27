@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0_06" class="java.beans.XMLDecoder"> 
+ <object class="patientModelSet.PatientModelSet"> 
+  <void property="classload"> 
+   <string>cardiomyopathy.Cardiomyopathy</string> 
+  </void> 
+  <void property="graphTime"> 
+   <double>9.0</double> 
+  </void> 
+  <void property="graphTitleString"> 
+   <string></string> 
+  </void> 
+  <void property="patientSet"> 
+   <void method="add"> 
+    <object class="cardiomyopathy.Cardiomyopathy"> 
+     <void property="afib_pr"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="age"> 
+      <double>55.1962</double> 
+     </void> 
+     <void property="bun_pr"> 
+      <double>10.0</double> 
+     </void> 
+     <void property="canadianAngina"> 
+      <string>0</string> 
+     </void> 
+     <void property="chol_pr"> 
+      <double>156.0</double> 
+     </void> 
+     <void property="confidenceLimits"> 
+      <boolean>false</boolean> 
+     </void> 
+     <void property="diabetes"> 
+      <string>Insulin</string> 
+     </void> 
+     <void property="hct_pr"> 
+      <double>44.0</double> 
+     </void> 
+     <void property="hx_copd"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="iv_pmi"> 
+      <double>3.58255</double> 
+     </void> 
+     <void property="nyha"> 
+      <string>III</string> 
+     </void> 
+     <void property="patientID"> 
+      <string>26347947</string> 
+     </void> 
+     <void property="patientName"> 
+      <string></string> 
+     </void> 
+     <void property="surgeryDate"> 
+      <object class="java.util.Date"> 
+       <long>1080882000000</long> 
+      </object> 
+     </void> 
+    </object> 
+   </void> 
+  </void> 
+ </object> 
+</java> 

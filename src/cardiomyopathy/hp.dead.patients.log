@@ -1,0 +1,898 @@
+1                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+NOTE: Copyright (c) 1999-2001 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software Release 8.2 (TS2M0)
+      Licensed to CLEVELAND CLINIC FOUNDATION, Site 0007023003.
+NOTE: This session is executing on the SunOS 5.9 platform.
+
+
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the files "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+NOTE: SAS initialization used:
+      real time           0.03 seconds
+      cpu time            0.02 seconds
+      
+1          %macro skkip;
+2          // JOB hp.dead.patients.sas
+3          sas8.2 hp.dead.patients.sas
+4          //cp hp.dead.patients.l*\
+5          //   /studies/cardiac/failure/ischemic/comparison/graphs/.
+6          //spool cont printer 'lptxt -l110 -s6 -f LetterGothic-Bold'
+7          spool cont to email
+8          splfile hp.dead.patients.l*
+9          // FILE hp.dead.patients.sas
+10         %mend;
+11         *______________________________________________________________________________;
+12         *                                                                              ;
+13         * /hp.dead.patients.sas
+14         *______________________________________________________________________________;
+15         *                                                                              ;
+16          %let STUDY=/studies/cardiac/failure/ischemic/comparison;
+17         *______________________________________________________________________________;
+18         *                                                                              ;
+19         * Surgical Management for Patients with Ischemic Cardiomyopathy
+20         * (CCF, 1997 to 2006, n=1321)
+21         *
+22         * Multivariable analysis of time-related death
+23         *
+24         * Using the multivariable equation for death, predict survival
+25         * For four surgical management groups;
+26         *   a). CABG alone
+27         *   b). CABG +MV anuloplasty
+28         *   c). DOR
+29         *   d). Heart Transplant
+30         *
+31         *
+32         * Export estimates for the four models to transport files for blackbox
+33         *______________________________________________________________________________;
+34         *                                                                              ;
+35           options pagesize=107 linesize=132;
+36           libname est v8  "&STUDY/estimates";
+NOTE: Libref EST was successfully assigned as follows: 
+      Engine:        V8 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/estimates
+37           libname graphs  "&STUDY/graphs";
+NOTE: Libref GRAPHS was successfully assigned as follows: 
+      Engine:        V8 
+      Physical Name: /studies/cardiac/failure/ischemic/comparison/graphs
+38           title1 "Surgical Management for Patients with Ischemic Cardiomyopathy";
+39           title2 "(CCF, 1997 to 2006, n=1321)";
+40           title3 "Multivariable Analysis of Death";
+41           title4 "Preoperative  Models for 4 surgical management groups";
+42         *______________________________________________________________________________;
+43         *                                                                              ;
+44         *               M U L T I V A R I A B L E   M O D E L S
+45         *______________________________________________________________________________;
+46         *                                                                              ;
+47         * variables listed in order:
+48         *
+49         * Early Hazard Phase:
+50         *       nyha34,ln_ef,cac_pr, chb_pr,
+51         *       hx_cva, hx_copd, hx_rnldz
+52         
+53         * Late Hazard Phase:
+54         *       agee,
+55         *       ef2, afib_pr,chb_pr, lmtany, rca50, lcx70, avrgrg, in_ivpmi,ivpmi2, ms_pmi,
+56         *       hx_popdz, hx_copd, hx_dmtrt, hx_iddm, in_chol, ms_cholp,
+57         *       hx_rnldz, ln_bun, ln_hct,  ms_hctp
+58         *
+59         *______________________________________________________________________________;
+60         *                                                                              ;
+61         * Definitions of variables in models;
+62           data design;
+63         
+64         * Demography;
+65           age=62;
+66         
+67         * Cardiac morbidity;
+68           iv_pmi=3;          /* Interval (years) from MI to operation              */
+69           ef_com=20;          /* LV ejection fraction (%)                           */
+70           nyha34=1;          /* NYHA function class 1/II vs III/IV (binary: 0, 1)  */
+71           cac_pr=2;          /* Cadian Angina Class:possible values: (0, 1, 2, 3, 4) */
+72           afib_pr=0;         /* Atrial Fibrillation (no/yes) (0,1) */
+73           chb_pr=0;          /* Complete heart block/pacer (no/yes) (0,1) */
+74           avrgrg=0;          /* AV regurgitation (no/yes) (0, 1) */
+75           lmtany=1;          /* LMT disease: stenosis>0%  (no/yes) (0, 1) */
+76           rca50=1;           /* RCA disease: stenosis>=50%  (no/yes) (0, 1) */
+77           lcx70=1;           /* LCX disease: stenosis>=70%  (no/yes) (0, 1) */
+78         
+79           ms_pmi=0;          /* missing value flag */
+80           ms_cadsy=0;        /* missing value flag */
+2                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+81         
+82         * Non-cardiac comorbidity;
+83           hx_cva=0;             /* History of stroke (no/yes) (0, 1) */
+84           hx_copd=0;            /* History of COPD (no/yes) (0, 1) */
+85           hx_popdz=0;           /* History of popliteal disease (no/yes) (0, 1) */
+86           hx_dmtrt=0;           /* History of treated diabetes (no/yes) (0, 1) */
+87           hx_iddm=0;            /* History of insulin dependent diabetes (no/yes) (0, 1) */
+88           chol_pr=168;           /* Cholesterol (mg/dL)                       */
+89           hct_pr=37;            /* Hematocrit (%)                       */
+90           hx_rnldz=0;           /* History of renal disease (no/yes) (0, 1) */
+91           bun_pr=24;            /* Blood urea nitrogen (mg/dL)                       */
+92         
+93           ms_cholp=0;           /* missing value flag */
+94           ms_hctp=0;            /* missing value flag */
+95           years=1;
+96         
+97         *******************************************************************************;
+98         * Set up variable values for a specific patient;
+99         * Two last variables are for prognostic model;
+100          patient=1;  age=75;
+101                      iv_pmi=10; ef_com=20; nyha34=1; cac_pr=4; afib_pr=1; chb_pr=1;
+102                      avrgrg=1; lmtany=1; rca50=1; lcx70=1; ms_pmi=0; ms_cadsy=0;
+103        
+104                      hx_cva=1; hx_copd=1; hx_popdz=1; hx_dmtrt=1; hx_iddm=0; chol_pr=180;
+105                      hct_pr=28; hx_rnldz=1; bun_pr=35; ms_cholp=0; ms_hctp=0;
+106          output;
+107        
+108          patient=2;  age=50;
+109                      iv_pmi=5; ef_com=25; nyha34=0; cac_pr=3; afib_pr=0; chb_pr=0;
+110                      avrgrg=1; lmtany=0; rca50=1; lcx70=0; ms_pmi=0; ms_cadsy=0;
+111        
+112                      hx_cva=0; hx_copd=1; hx_popdz=0; hx_dmtrt=0; hx_iddm=0; chol_pr=150;
+113                      hct_pr=40; hx_rnldz=0; bun_pr=22; ms_cholp=0; ms_hctp=0;
+114          output;
+115        
+116          patient=3;  age=60;
+117                      iv_pmi=12; ef_com=15; nyha34=1; cac_pr=4; afib_pr=1; chb_pr=1;
+118                      avrgrg=1; lmtany=1; rca50=0; lcx70=1; ms_pmi=0; ms_cadsy=0;
+119        
+120                      hx_cva=1; hx_copd=1; hx_popdz=1; hx_dmtrt=0; hx_iddm=0; chol_pr=170;
+121                      hct_pr=30; hx_rnldz=1; bun_pr=32; ms_cholp=0; ms_hctp=0;
+122          output;
+123        
+124          patient=4;  age=60;
+125                      iv_pmi=6; ef_com=17; nyha34=0; cac_pr=0; afib_pr=1; chb_pr=1;
+126                      avrgrg=1; lmtany=1; rca50=1; lcx70=1; ms_pmi=0; ms_cadsy=0;
+127        
+128                      hx_cva=1; hx_copd=1; hx_popdz=1; hx_dmtrt=0; hx_iddm=0; chol_pr=170;
+129                      hct_pr=40; hx_rnldz=1; bun_pr=20; ms_cholp=0; ms_hctp=0;
+130          output;
+131        *******************************************************************************;
+132        * Transformations of variables;
+
+NOTE: The data set WORK.DESIGN has 4 observations and 26 variables.
+NOTE: DATA statement used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+133          data design; set design;
+134          agee=exp(age/50);
+135          ln_ef=log(ef_com);
+136          ef2=(ef_com/20)**2;
+137          ivpmi2=(iv_pmi/3)**2;
+138          in_ivpmi=(1/(iv_pmi+1));
+139          in_chol=(100/chol_pr);
+140          ln_bun=log(bun_pr);
+141          ln_hct=log(hct_pr);
+
+NOTE: There were 4 observations read from the data set WORK.DESIGN.
+NOTE: The data set WORK.DESIGN has 4 observations and 34 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+142          proc print d;
+143        *______________________________________________________________________________;
+144        *                                                                              ;
+145        * Predictions                                                                  ;
+146        *______________________________________________________________________________;
+147        *                                                                              ;
+148        * Generate and output points, remembering any transforms                       ;
+
+NOTE: There were 4 observations read from the data set WORK.DESIGN.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+149          data predict; set design; digital=0;
+150          min=-8; max=log(9); inc=(max-min)/999.9;
+151          do ln_yrs=min to max by inc, max; years=exp(ln_yrs); output; end;
+152        *******************************************************************************;
+153        * Generate time points at "nice" intervals for tabular (digital) depiction     ;
+
+NOTE: There were 4 observations read from the data set WORK.DESIGN.
+NOTE: The data set WORK.PREDICT has 4004 observations and 39 variables.
+NOTE: DATA statement used:
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+154          data digital; set design; digital=1;
+3                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+155          do years=30/365.2425, 3/12, 6/12, 9/12, 1 to 9 by 1; output; end;
+156        *******************************************************************************;
+157        * Transformations of variables                                                 ;
+
+NOTE: There were 4 observations read from the data set WORK.DESIGN.
+NOTE: The data set WORK.DIGITAL has 52 observations and 35 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+158          data predict; set predict digital;
+159        *******************************************************************************;
+160        * Do predictions, exporting at the same time the estimates to transport files;
+161        * CABG alone model;
+162           title6 "CABG alone Model";
+163          %hazpred(
+164          proc hazpred data=predict inhaz=est.hmdead_cabg out=pred_cabg; time years; )
+
+NOTE: There were 4004 observations read from the data set WORK.PREDICT.
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.PREDICT has 4056 observations and 39 variables.
+NOTE: DATA statement used:
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+NOTE: There were 4056 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_CABG has 4056 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.05 seconds
+      cpu time            0.05 seconds
+      
+
+165          run;
+166        
+167        ******************************************************************************************;
+168        * CABG+MV anuloplasty model;
+169        title6 "CABG + MV anuloplasty Model";
+170          %hazpred(
+171          proc hazpred data=predict inhaz=est.hmdead_cbgv out=pred_cbgv; time years; )
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+NOTE: There were 4056 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_CBGV has 4056 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.05 seconds
+      cpu time            0.05 seconds
+      
+
+172          run;
+173        
+174        ******************************************************************************************;
+175        * DOR model;
+176         title6 "DOR Model";
+177          %hazpred(
+178          proc hazpred data=predict inhaz=est.hmdead_dor out=pred_dor; time years; )
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+NOTE: There were 4056 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_DOR has 4056 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.05 seconds
+      cpu time            0.05 seconds
+      
+
+179          run;
+180        
+181        ******************************************************************************************;
+182        * Heart Transplant model;
+183          title6 "Heart Transplant Model";
+184          %hazpred(
+185          proc hazpred data=predict inhaz=est.hmdead_txpl out=pred_txpl; time years; )
+
+Note: Procedure HAZPRED (C-Version 4.2.beta1)
+      The Cleveland Clinic Foundation
+      9500 Euclid Avenue
+      Cleveland, Ohio 44195
+      Phone: (216) 444-6712
+      Email: hazard@bio.ri.ccf.org
+Note: Procedure HAZPRED completed successfully.
+
+4                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+NOTE: There were 4056 observations read from the data set HZRCALL.HZRCALL.
+NOTE: The data set WORK.PRED_TXPL has 4056 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.05 seconds
+      cpu time            0.05 seconds
+      
+
+186          run;
+187        
+188        *______________________________________________________________________________;
+189        *                                                                              ;
+190        *                                  P L O T S
+191        *______________________________________________________________________________;
+192        *                                                                              ;
+193        * Printer plot survival and hazard                                             ;
+194        
+195          title6 "CABG alone Model";
+196          proc plot data=pred_cabg;
+197               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+198                  /overlay;
+199          run;
+
+200        
+201          title6 "CABG + MV anuloplasty Model";
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_CABG.
+NOTE: The PROCEDURE PLOT printed page 2.
+NOTE: PROCEDURE PLOT used:
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+202          proc plot data=pred_cbgv;
+203               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+204                  /overlay;
+205          run;
+
+206        
+207          title6 "DOR Model";
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_CBGV.
+NOTE: The PROCEDURE PLOT printed page 3.
+NOTE: PROCEDURE PLOT used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+208          proc plot data=pred_dor;
+209               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+210                  /overlay;
+211          run;
+
+212        
+213          title6 "Heart Transplant Model";
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_DOR.
+NOTE: The PROCEDURE PLOT printed page 4.
+NOTE: PROCEDURE PLOT used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+214          proc plot data=pred_txpl;
+215               plot _surviv*years=patient _cllsurv*years='.' _clusurv*years='.'
+216                  /overlay;
+217          run;
+
+218        
+219        *******************************************************************************;
+220        * Digital nomogram                                                             ;
+221          title6 "CABG alone Model";
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_TXPL.
+NOTE: The PROCEDURE PLOT printed page 5.
+NOTE: PROCEDURE PLOT used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+222          data digital; set pred_cabg; if digital=1;
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_CABG.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+223          proc sort; by patient years;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+224          proc print d; by patient; var patient years
+225               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+226          run;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed pages 6-7.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+5                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+      cpu time            0.00 seconds
+      
+
+227        
+228          title6 "CABG+MV anuloplasty Model";
+229          data digital; set pred_cbgv; if digital=1;
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_CBGV.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+230          proc sort; by patient years;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+231          proc print d; by patient; var patient years
+232               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+233          run;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed pages 8-9.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+234        
+235          title6 "DOR Model";
+236          data digital; set pred_dor; if digital=1;
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_DOR.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+237          proc sort; by patient years;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+238          proc print d; by patient; var patient years
+239               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+240          run;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed pages 10-11.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+241        
+242          title6 "Heart Transplant Model";
+243          data digital; set pred_txpl; if digital=1;
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_TXPL.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: DATA statement used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+244          proc sort; by patient years;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The data set WORK.DIGITAL has 52 observations and 51 variables.
+NOTE: PROCEDURE SORT used:
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+245          proc print d; by patient; var patient years
+246               _surviv _cllsurv _clusurv _hazard _cllhaz _cluhaz;
+247          run;
+
+NOTE: There were 52 observations read from the data set WORK.DIGITAL.
+NOTE: The PROCEDURE PRINT printed pages 12-13.
+NOTE: PROCEDURE PRINT used:
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+248        
+249        *******************************************************************************;
+250        
+251        data pred_cabg; set pred_cabg; if digital=0;
+252          ssurviv=_surviv*100;
+253          scllsurv=_cllsurv*100;
+254          sclusurv=_clusurv*100;
+255        
+256          shazard=_hazard*100;
+6                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+257          scllhaz=_cllhaz*100;
+258          scluhaz=_cluhaz*100;
+259        
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_CABG.
+NOTE: The data set WORK.PRED_CABG has 4004 observations and 57 variables.
+NOTE: DATA statement used:
+      real time           0.02 seconds
+      cpu time            0.02 seconds
+      
+
+260          proc means;
+261          run;
+
+NOTE: There were 4004 observations read from the data set WORK.PRED_CABG.
+NOTE: The PROCEDURE MEANS printed page 14.
+NOTE: PROCEDURE MEANS used:
+      real time           0.06 seconds
+      cpu time            0.06 seconds
+      
+
+262        
+263        data pred_cbgv; set pred_cbgv; if digital=0;
+264          ssurviv=_surviv*100;
+265          scllsurv=_cllsurv*100;
+266          sclusurv=_clusurv*100;
+267        
+268          shazard=_hazard*100;
+269          scllhaz=_cllhaz*100;
+270          scluhaz=_cluhaz*100;
+271        
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_CBGV.
+NOTE: The data set WORK.PRED_CBGV has 4004 observations and 57 variables.
+NOTE: DATA statement used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+272          proc means;
+273          run;
+
+NOTE: There were 4004 observations read from the data set WORK.PRED_CBGV.
+NOTE: The PROCEDURE MEANS printed page 15.
+NOTE: PROCEDURE MEANS used:
+      real time           0.05 seconds
+      cpu time            0.06 seconds
+      
+
+274        
+275        
+276        data pred_dor; set pred_dor; if digital=0;
+277          ssurviv=_surviv*100;
+278          scllsurv=_cllsurv*100;
+279          sclusurv=_clusurv*100;
+280        
+281          shazard=_hazard*100;
+282          scllhaz=_cllhaz*100;
+283          scluhaz=_cluhaz*100;
+284        
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_DOR.
+NOTE: The data set WORK.PRED_DOR has 4004 observations and 57 variables.
+NOTE: DATA statement used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+285          proc means;
+286          run;
+
+NOTE: There were 4004 observations read from the data set WORK.PRED_DOR.
+NOTE: The PROCEDURE MEANS printed page 16.
+NOTE: PROCEDURE MEANS used:
+      real time           0.06 seconds
+      cpu time            0.06 seconds
+      
+
+287        
+288        
+289        data pred_txpl; set pred_txpl; if digital=0;
+290          ssurviv=_surviv*100;
+291          scllsurv=_cllsurv*100;
+292          sclusurv=_clusurv*100;
+293        
+294          shazard=_hazard*100;
+295          scllhaz=_cllhaz*100;
+296          scluhaz=_cluhaz*100;
+297        
+
+NOTE: There were 4056 observations read from the data set WORK.PRED_TXPL.
+NOTE: The data set WORK.PRED_TXPL has 4004 observations and 57 variables.
+NOTE: DATA statement used:
+      real time           0.01 seconds
+      cpu time            0.02 seconds
+      
+
+298          proc means;
+299          run;
+
+NOTE: There were 4004 observations read from the data set WORK.PRED_TXPL.
+NOTE: The PROCEDURE MEANS printed page 17.
+NOTE: PROCEDURE MEANS used:
+      real time           0.05 seconds
+      cpu time            0.06 seconds
+7                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+      
+
+300        *******************************************************************************;
+301        * Bring in PostScript plot macro                                               ;
+302          filename plot "!MACROS/plot.sas"; %inc plot;
+1740         filename gsasfile pipe 'lp';
+1741       *______________________________________________________________________________;
+1742       *                                                                              ;
+1743       *                     P O S T S C R I P T   P L O T S
+1744       *______________________________________________________________________________;
+1745       *                                                                              ;
+1746       * Survival for patient 1                                                       ;
+1747        filename gsasfile "&STUDY/graphs/hp.dead.pt1.survival.ps";
+1748         %plot(goptions gsfmode=replace, gaccess=gsasfile, end;
+1749           id l="&STUDY/graphs/hp.dead.patients.sas survival", end;
+1750           labelx l="Years",end;
+1751             axisx order=(0 to 9 by 1), minor=none, end;
+1752           labely l="Survival (%)",end;
+1753             axisy order=(0 to 100 by 10), minor=none, end;
+1754       
+1755           tuple set=pred_cabg(where=(patient=1)), x=years, y=ssurviv, linepe=2, end;
+1756       
+1757           tuple set=pred_cbgv(where=(patient=1)),x=years, y=ssurviv,linepe=21,end;
+1758       
+1759           tuple set=pred_dor(where=(patient=1)), x=years, y=ssurviv,linepe=22, end;
+1760       
+1761           tuple set=pred_txpl(where=(patient=1)), x=years, y=ssurviv, linepe=23,end;
+1762       
+1763         );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   device=ljivps  htext= 0.24480 
+rotate=landscape GACCESS=gsasfile GSFMODE=replace ftext=SWISS GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.14 seconds
+      cpu time            0.10 seconds
+      
+
+1764         run;
+1765       *********************************************************************************;
+1766       * Survival for patient 2                                                       ;
+1767        filename gsasfile "&STUDY/graphs/hp.dead.pt2.survival.ps";
+1768         %plot(goptions gsfmode=replace, gaccess=gsasfile, end;
+1769           id l="&STUDY/graphs/hp.dead.patients.sas survival", end;
+1770           labelx l="Years",end;
+1771             axisx order=(0 to 9 by 1), minor=none, end;
+1772           labely l="Survival (%)",end;
+1773             axisy order=(0 to 100 by 10), minor=none, end;
+1774       
+1775           tuple set=pred_cabg(where=(patient=2)), x=years, y=ssurviv, linepe=2, end;
+1776       
+1777           tuple set=pred_cbgv(where=(patient=2)),x=years, y=ssurviv,linepe=21,end;
+1778       
+1779           tuple set=pred_dor(where=(patient=2)), x=years, y=ssurviv,linepe=22, end;
+1780       
+1781           tuple set=pred_txpl(where=(patient=2)), x=years, y=ssurviv, linepe=23,end;
+1782       
+1783         );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   device=ljivps  htext= 0.24480 
+rotate=landscape GACCESS=gsasfile GSFMODE=replace ftext=SWISS GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.05 seconds
+      cpu time            0.06 seconds
+      
+
+1784         run;
+1785       *********************************************************************************;
+1786       * Survival for patient 3                                                       ;
+1787        filename gsasfile "&STUDY/graphs/hp.dead.pt3.survival.ps";
+1788         %plot(goptions gsfmode=replace, gaccess=gsasfile, end;
+1789           id l="&STUDY/graphs/hp.dead.patients.sas survival", end;
+1790           labelx l="Years",end;
+1791             axisx order=(0 to 9 by 1), minor=none, end;
+1792           labely l="Survival (%)",end;
+1793             axisy order=(0 to 100 by 10), minor=none, end;
+1794       
+1795           tuple set=pred_cabg(where=(patient=3)), x=years, y=ssurviv, linepe=2, end;
+1796       
+1797           tuple set=pred_cbgv(where=(patient=3)),x=years, y=ssurviv,linepe=21,end;
+1798       
+1799           tuple set=pred_dor(where=(patient=3)), x=years, y=ssurviv,linepe=22, end;
+1800       
+1801           tuple set=pred_txpl(where=(patient=3)), x=years, y=ssurviv, linepe=23,end;
+1802       
+1803         );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   device=ljivps  htext= 0.24480 
+rotate=landscape GACCESS=gsasfile GSFMODE=replace ftext=SWISS GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.07 seconds
+      cpu time            0.07 seconds
+      
+
+1804         run;
+1805       *********************************************************************************;
+1806       * Survival for patient 4                                                       ;
+1807        filename gsasfile "&STUDY/graphs/hp.dead.pt4.survival.ps";
+1808         %plot(goptions gsfmode=replace, gaccess=gsasfile, end;
+1809           id l="&STUDY/graphs/hp.dead.patients.sas survival", end;
+8                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+1810           labelx l="Years",end;
+1811             axisx order=(0 to 9 by 1), minor=none, end;
+1812           labely l="Survival (%)",end;
+1813             axisy order=(0 to 100 by 10), minor=none, end;
+1814       
+1815           tuple set=pred_cabg(where=(patient=4)), x=years, y=ssurviv, linepe=2, end;
+1816       
+1817           tuple set=pred_cbgv(where=(patient=4)),x=years, y=ssurviv,linepe=21,end;
+1818       
+1819           tuple set=pred_dor(where=(patient=4)), x=years, y=ssurviv,linepe=22, end;
+1820       
+1821           tuple set=pred_txpl(where=(patient=4)), x=years, y=ssurviv, linepe=23,end;
+1822       
+1823         );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   device=ljivps  htext= 0.24480 
+rotate=landscape GACCESS=gsasfile GSFMODE=replace ftext=SWISS GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.06 seconds
+      cpu time            0.07 seconds
+      
+
+1824         run;
+1825       
+1826       *______________________________________________________________________________;
+1827       *                                                                              ;
+1828       *                          C G M   P L O T T I N G                             ;
+1829       *______________________________________________________________________________;
+1830       *                                                                              ;
+1831       * Survival                                                                     ;
+1832         filename gsasfile "&STUDY/graphs/hp.dead.pt1.cgm";
+1833         %plot(goptions gsfmode=replace, device=cgmmppa, ftext=hwcgm001, end;
+1834           axisx order=(0 to 8 by 2), minor=none, value=(height=2.4), end;
+1835           axisy order=(0 to 100 by 20), minor=none, value=(height=2.4),
+1836             value=(height=2.4 j=r ' ' '20' '40' '60' '80' '100'), end;
+1837       
+1838           tuple set=pred_cabg(where=(patient=1)), x=years, y=ssurviv, color=yellow, width=3, end;
+1839           tuple set=pred_cbgv(where=(patient=1)), x=years, y=ssurviv, color=cyan, width=3, end;
+1840           tuple set=pred_dor(where=(patient=1)), x=years, y=ssurviv, color=orange, width=3, end;
+1841           tuple set=pred_txpl(where=(patient=1)), x=years, y=ssurviv, color=red, width=3, end;
+1842       
+1843       
+1844          );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   DEVICE=cgmmppa  htext= 
+0.26010 rotate=landscape gaccess=gsasfile GSFMODE=replace ftext=hwcgm001 GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.17 seconds
+      cpu time            0.11 seconds
+      
+
+1845         run;
+1846       *******************************************************************************;
+1847       * Survival                                                                     ;
+1848         filename gsasfile "&STUDY/graphs/hp.dead.pt2.cgm";
+1849         %plot(goptions gsfmode=replace, device=cgmmppa, ftext=hwcgm001, end;
+1850           axisx order=(0 to 8 by 2), minor=none, value=(height=2.4), end;
+1851           axisy order=(0 to 100 by 20), minor=none, value=(height=2.4),
+1852             value=(height=2.4 j=r ' ' '20' '40' '60' '80' '100'), end;
+1853       
+1854           tuple set=pred_cabg(where=(patient=2)), x=years, y=ssurviv, color=yellow, width=3, end;
+1855           tuple set=pred_cbgv(where=(patient=2)), x=years, y=ssurviv, color=cyan, width=3, end;
+1856           tuple set=pred_dor(where=(patient=2)), x=years, y=ssurviv, color=orange, width=3, end;
+1857           tuple set=pred_txpl(where=(patient=2)), x=years, y=ssurviv, color=red, width=3, end;
+1858       
+1859       
+1860          );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   DEVICE=cgmmppa  htext= 
+0.26010 rotate=landscape gaccess=gsasfile GSFMODE=replace ftext=hwcgm001 GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.08 seconds
+      cpu time            0.06 seconds
+      
+
+1861         run;
+1862       *******************************************************************************;
+1863       * Survival                                                                     ;
+1864         filename gsasfile "&STUDY/graphs/hp.dead.pt3.cgm";
+1865         %plot(goptions gsfmode=replace, device=cgmmppa, ftext=hwcgm001, end;
+1866           axisx order=(0 to 8 by 2), minor=none, value=(height=2.4), end;
+1867           axisy order=(0 to 100 by 20), minor=none, value=(height=2.4),
+1868             value=(height=2.4 j=r ' ' '20' '40' '60' '80' '100'), end;
+1869       
+1870           tuple set=pred_cabg(where=(patient=3)), x=years, y=ssurviv, color=yellow, width=3, end;
+1871           tuple set=pred_cbgv(where=(patient=3)), x=years, y=ssurviv, color=cyan, width=3, end;
+1872           tuple set=pred_dor(where=(patient=3)), x=years, y=ssurviv, color=orange, width=3, end;
+1873           tuple set=pred_txpl(where=(patient=3)), x=years, y=ssurviv, color=red, width=3, end;
+1874       
+1875       
+1876          );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   DEVICE=cgmmppa  htext= 
+0.26010 rotate=landscape gaccess=gsasfile GSFMODE=replace ftext=hwcgm001 GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.20 seconds
+      cpu time            0.10 seconds
+9                                                          The SAS System                           14:27 Monday, September 10, 2007
+
+      
+
+1877         run;
+1878       *******************************************************************************;
+1879       * Survival                                                                     ;
+1880         filename gsasfile "&STUDY/graphs/hp.dead.pt4.cgm";
+1881         %plot(goptions gsfmode=replace, device=cgmmppa, ftext=hwcgm001, end;
+1882           axisx order=(0 to 8 by 2), minor=none, value=(height=2.4), end;
+1883           axisy order=(0 to 100 by 20), minor=none, value=(height=2.4),
+1884             value=(height=2.4 j=r ' ' '20' '40' '60' '80' '100'), end;
+1885       
+1886           tuple set=pred_cabg(where=(patient=4)), x=years, y=ssurviv, color=yellow, width=3, end;
+1887           tuple set=pred_cbgv(where=(patient=4)), x=years, y=ssurviv, color=cyan, width=3, end;
+1888           tuple set=pred_dor(where=(patient=4)), x=years, y=ssurviv, color=orange, width=3, end;
+1889           tuple set=pred_txpl(where=(patient=4)), x=years, y=ssurviv, color=red, width=3, end;
+1890       
+1891       
+1892          );
+*** ==>  sas version is 8.2
+GOPTIONS reset=all ctitle=BLACK ctext=BLACK cback=WHITE csymbol=BLACK fontres=presentation gunit=in   DEVICE=cgmmppa  htext= 
+0.26010 rotate=landscape gaccess=gsasfile GSFMODE=replace ftext=hwcgm001 GEPILOG="" NODASH
+
+NOTE: There were 1001 observations read from the data set WORK._ZZPLZZ_.
+NOTE: PROCEDURE GPLOT used:
+      real time           0.17 seconds
+      cpu time            0.10 seconds
+      
+
+1893         run;
+1894       *******************************************************************************;
+1895       
+1896       
+1897       quit;
+1898       
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           13.22 seconds
+      cpu time            8.36 seconds
+      

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.6.0" class="java.beans.XMLDecoder"> 
+ <object class="patientModelSet.PatientModelSet"> 
+  <void property="classload"> 
+   <string>cardiomyopathy.Cardiomyopathy</string> 
+  </void> 
+  <void property="graphTime"> 
+   <double>20.0</double> 
+  </void> 
+  <void property="graphTitleString"> 
+   <string></string> 
+  </void> 
+  <void property="patientSet"> 
+   <void method="add"> 
+    <object class="transplantSupport.TransplantSupport"> 
+     <void property="aicdls"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="bilils"> 
+      <double>1.6</double> 
+     </void> 
+     <void property="birthDate"> 
+      <object class="java.util.Date"> 
+       <long>-778190400000</long> 
+      </object> 
+     </void> 
+     <void property="bloodgroup"> 
+      <string>O</string> 
+     </void> 
+     <void property="bunls"> 
+      <double>20.0</double> 
+     </void> 
+     <void property="cardiomyopathy"> 
+      <string>Ischemic</string> 
+     </void> 
+     <void property="creals"> 
+      <double>1.0</double> 
+     </void> 
+     <void property="height"> 
+      <double>183.0</double> 
+     </void> 
+     <void property="hgbls"> 
+      <double>13.6</double> 
+     </void> 
+     <void property="hx_csurg"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="listDate"> 
+      <object class="java.util.Date"> 
+       <long>1111986000000</long> 
+      </object> 
+     </void> 
+     <void property="lvefpr"> 
+      <double>20.0</double> 
+     </void> 
+     <void property="padpr"> 
+      <double>30.0</double> 
+     </void> 
+     <void property="paspr"> 
+      <double>68.0</double> 
+     </void> 
+     <void property="patientColor"> 
+      <string>DARK_BLUE</string> 
+     </void> 
+     <void property="patientName"> 
+      <string>BH</string> 
+     </void> 
+     <void property="pcwpr"> 
+      <double>32.0</double> 
+     </void> 
+     <void property="ptcapr"> 
+      <boolean>true</boolean> 
+     </void> 
+     <void property="tranpr"> 
+      <boolean>true</boolean> 
+     </void> 
+    </object> 
+   </void> 
+  </void> 
+ </object> 
+</java> 

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.5.0_08" class="java.beans.XMLDecoder"> 
+ <object class="picabg.PICABG"> 
+  <void property="age"> 
+   <int>75</int> 
+  </void> 
+  <void property="creat_pr"> 
+   <double>1.8</double> 
+  </void> 
+  <void property="diabetes"> 
+   <string>Oral</string> 
+  </void> 
+  <void property="hct_pr"> 
+   <double>38.0</double> 
+  </void> 
+  <void property="height"> 
+   <double>173.0</double> 
+  </void> 
+  <void property="hx_htn"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="hx_mi"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="hx_smoke"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="ita"> 
+   <string>Both</string> 
+  </void> 
+  <void property="lad"> 
+   <double>90.0</double> 
+  </void> 
+  <void property="lcx"> 
+   <double>85.0</double> 
+  </void> 
+  <void property="lmt"> 
+   <double>60.0</double> 
+  </void> 
+  <void property="lvcath"> 
+   <string>Moderate</string> 
+  </void> 
+  <void property="patientColor"> 
+   <string>CYAN</string> 
+  </void> 
+  <void property="patientID"> 
+   <string>456</string> 
+  </void> 
+  <void property="patientName"> 
+   <string>Test Patient</string> 
+  </void> 
+  <void property="rca"> 
+   <double>100.0</double> 
+  </void> 
+  <void property="trig_pr"> 
+   <double>225.0</double> 
+  </void> 
+  <void property="weight"> 
+   <double>78.0</double> 
+  </void> 
+ </object> 
+</java> 

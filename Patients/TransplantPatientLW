@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.5.0_08" class="java.beans.XMLDecoder"> 
+ <object class="transplantSupport.TransplantSupport"> 
+  <void property="bilils"> 
+   <double>0.7</double> 
+  </void> 
+  <void property="birthDate"> 
+   <object class="java.util.Date"> 
+    <long>-556833600000</long> 
+   </object> 
+  </void> 
+  <void property="bloodgroup"> 
+   <string>O</string> 
+  </void> 
+  <void property="bunls"> 
+   <double>27.0</double> 
+  </void> 
+  <void property="creals"> 
+   <double>3.9</double> 
+  </void> 
+  <void property="female"> 
+   <boolean>true</boolean> 
+  </void> 
+  <void property="height"> 
+   <double>176.0</double> 
+  </void> 
+  <void property="hgbls"> 
+   <double>13.3</double> 
+  </void> 
+  <void property="init_b"> 
+   <double>90.0</double> 
+  </void> 
+  <void property="init_t"> 
+   <double>76.0</double> 
+  </void> 
+  <void property="listDate"> 
+   <object class="java.util.Date"> 
+    <long>1115092800000</long> 
+   </object> 
+  </void> 
+  <void property="lvefpr"> 
+   <double>15.0</double> 
+  </void> 
+  <void property="numPreg"> 
+   <int>2</int> 
+  </void> 
+  <void property="padpr"> 
+   <double>30.0</double> 
+  </void> 
+  <void property="paspr"> 
+   <double>52.0</double> 
+  </void> 
+  <void property="patientColor"> 
+   <string>VERY_DARK_BLUE</string> 
+  </void> 
+  <void property="patientName"> 
+   <string>LW</string> 
+  </void> 
+  <void property="pcwpr"> 
+   <double>16.0</double> 
+  </void> 
+  <void property="rcmvgpos"> 
+   <boolean>false</boolean> 
+  </void> 
+ </object> 
+</java> 

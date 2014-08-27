@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<java version="1.5.0_08" class="java.beans.XMLDecoder"> 
+ <object class="postInfarctVSD.PostInfarctVSD"> 
+  <void property="bun"> 
+   <double>44.0</double> 
+  </void> 
+  <void property="iv_misg"> 
+   <int>3</int> 
+  </void> 
+  <void property="opDate"> 
+   <object class="java.util.Date"> 
+    <long>863928000000</long> 
+   </object> 
+  </void> 
+  <void property="patientName"> 
+   <string>Patient 3 (EC)</string> 
+  </void> 
+  <void property="urineOutput"> 
+   <string>Oliguria, output &lt; 20 mL/hr</string> 
+  </void> 
+ </object> 
+</java> 

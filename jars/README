@@ -1,0 +1,15 @@
+			README
+			======
+
+jarfiles (Jar files directory)
+
+	-	activation-?.?.?.jar (Sun Java Activation Framework jar file. It is required by the the Java Mail)
+	-	log4j-?.?.?.jar	(Jakarta log4j package for logging API)
+	-	mailapi.jar  (Sun Java Mail package. Contains javax.mail and other related packages)
+  - smtp.jar (Sun smtp library, required by mailapi.jar)
+  - jfreechart-?.?.?.jar (Java graphing library)
+  - forms-?.?.?.jar (Jgoodies data entry forms library)
+  - binding-?.?.?.jar (Jgoodies data bindings library used by validation for form validation)
+  - looks.?.?.?.jar (JGoodies pretty gui mods)
+  - validation-?.?.?.jar (JGoodies data entry validation library)
+  - jcommon-?.?.?.jar (JGoodies common library required by all JGoodies libraries.)
